@@ -1,0 +1,8 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`AppHeader > matches snapshot 1`] = `
+"<header class="flex">
+  <h1>Spelling Scramble</h1>
+  <nav><a href="/" class="router-link-active router-link-exact-active" aria-current="page">Homes</a></nav>
+</header>"
+`;
