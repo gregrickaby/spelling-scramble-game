@@ -5,7 +5,7 @@
 @layer base {
   body {
     @apply relative mx-auto space-y-8 p-8 antialiased lg:px-0;
-    @apply prose prose-zinc lg:prose-xl max-w-4xl;
+    @apply prose prose-zinc max-w-4xl lg:prose-xl;
     @apply bg-white;
   }
 
@@ -27,6 +27,15 @@
     @apply rounded px-4 py-3 leading-tight no-underline shadow-md;
     @apply bg-zinc-200 text-zinc-900;
     @apply hover:bg-zinc-300 hover:shadow-sm;
+  }
+
+  body,
+  button,
+  input,
+  select,
+  textarea,
+  a {
+    cursor: url('/cursor.png'), auto;
   }
 
   a {
