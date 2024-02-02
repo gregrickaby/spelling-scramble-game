@@ -141,6 +141,9 @@ function resetGame() {
           :key="index"
           class="draggable rounded border-2 px-5 py-3 text-6xl leading-none shadow-lg"
           draggable="true"
+          @touchstart="dragStart($event, index)"
+          @touchmove="dragOver($event, index)"
+          @touchend="drop($event, index)"
           @dragstart="dragStart($event, index)"
           @dragover.prevent
           @dragover="dragOver($event, index)"
