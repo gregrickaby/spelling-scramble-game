@@ -1,12 +1,8 @@
 <script setup lang="ts">
-import clickSound from '@/assets/click.mp3'
-import negativeSound from '@/assets/negative.mp3'
-import startSound from '@/assets/start.mp3'
-import taDaSound from '@/assets/tada.mp3'
-import yaySound from '@/assets/yay.mp3'
 import { useCounter } from '@/composables/useCounter'
 import { useSpellingStore } from '@/stores/spellingStore'
-import confetti from 'canvas-confetti'
+import triggerConfetti from '@/utils/confetti'
+import playSound from '@/utils/sounds'
 import { computed, ref, watch, watchEffect } from 'vue'
 
 const store = useSpellingStore()
@@ -15,6 +11,7 @@ const newWords = ref('')
 const start = ref(false)
 const draggableLetters = ref([])
 const dragging = ref(null)
+const showWord = ref(true)
 const currentWord = computed(() => store.currentWord)
 const scrambledLettersComputed = computed(() => store.scrambledWord.split(''))
 const gameMessage = computed(() => store.message)
@@ -24,8 +21,10 @@ const { displayValue, animateTo } = useCounter()
 // Whenever scrambledLettersComputed changes, update draggableLetters
 watchEffect(() => {
   draggableLetters.value = scrambledLettersComputed.value.slice()
-  gameCompleted.value === true && triggerConfetti()
-  gameCompleted.value === true && playTaDa()
+  if (gameCompleted.value === true) {
+    triggerConfetti()
+    playSound('taDa')
+  }
 })
 
 watch(
@@ -38,6 +37,7 @@ watch(
 
 // The user is dragging a letter.
 function dragStart(e, index) {
+  e.dataTransfer.setData('text/plain', index.toString())
   dragging.value = index
   e.target.classList.add('dragging')
 }
@@ -47,6 +47,10 @@ function dragEnter(e, index) {
   if (index !== dragging.value) {
     e.target.classList.add('wiggle')
   }
+}
+
+function dragOver(e, index) {
+  e.preventDefault()
 }
 
 // The user is dragging a letter out of another letter.
@@ -63,7 +67,7 @@ function drop(e, index) {
     dragging.value = null // Reset dragging index
     e.target.classList.remove('dragging')
     e.target.classList.remove('wiggle')
-    playClick()
+    playSound('click')
   }
 }
 
@@ -71,25 +75,17 @@ function addWordsAndStart() {
   const wordsArray = newWords.value.split(',').map((word) => word.trim())
   store.addWords(wordsArray)
   start.value = true
-  playStart()
+  playSound('start')
 }
 
 function checkOrder() {
   if (draggableLetters.value.join('') === store.currentWord) {
     store.nextWord() // Move to the next word if correct
-    playYay()
+    playSound('yay')
   } else {
     store.setMessage('😭 Try again!')
-    playNegative()
+    playSound('negative')
   }
-}
-
-function triggerConfetti() {
-  confetti({
-    particleCount: 100,
-    spread: 70,
-    origin: { y: 0.6 }
-  })
 }
 
 function resetGame() {
@@ -98,38 +94,10 @@ function resetGame() {
   start.value = false // Hide the game interface
   draggableLetters.value = [] // Clear the draggable letters
 }
-
-function playStart() {
-  const audio = new Audio(startSound)
-  audio.play()
-}
-
-function playYay() {
-  const audio = new Audio(yaySound)
-  audio.play()
-}
-
-function playTaDa() {
-  const audio = new Audio(taDaSound)
-  audio.play()
-}
-
-function playNegative() {
-  const audio = new Audio(negativeSound)
-  audio.play()
-}
-
-function playClick() {
-  const audio = new Audio(clickSound)
-  audio.play()
-}
 </script>
 
 <template>
   <main class="space-y-8 text-center">
-    <p v-if="!start">👋 Hello! Welcome to Spelling Scramble.</p>
-    <p v-if="start && !gameCompleted">Click and drag the letters to spell the word.</p>
-
     <div v-if="start" class="points-display">
       <span v-if="name">{{ name }}'s</span> Points: {{ displayValue }}
     </div>
@@ -156,14 +124,14 @@ function playClick() {
         v-model="newWords"
       ></textarea>
       <p v-if="!start">To get started, add some words above and click "Start".</p>
-      <button type="submit">Start 🚀</button>
+      <button type="submit">Start 🐝</button>
     </form>
 
     <div
       v-if="start && !gameCompleted"
       class="item-center flex flex-col items-center justify-center space-y-8"
     >
-      <h1 class="leading-0 m-0 w-fit rounded bg-zinc-200 px-5 py-3">
+      <h1 v-show="showWord" class="leading-0 m-0 text-8xl">
         {{ currentWord }}
       </h1>
 
@@ -171,10 +139,11 @@ function playClick() {
         <div
           v-for="(letter, index) in draggableLetters"
           :key="index"
-          class="draggable rounded border-2 px-5 py-3 text-4xl leading-none shadow-lg"
+          class="draggable rounded border-2 px-5 py-3 text-6xl leading-none shadow-lg"
           draggable="true"
           @dragstart="dragStart($event, index)"
           @dragover.prevent
+          @dragover="dragOver($event, index)"
           @dragenter="dragEnter($event, index)"
           @dragleave="dragLeave($event, index)"
           @drop="drop($event, index)"
@@ -182,17 +151,19 @@ function playClick() {
           {{ letter }}
         </div>
       </div>
-
+      <p v-if="start && !gameCompleted">Drag the letters in the correct order</p>
       <div class="drag-enter flex flex-wrap items-center justify-center gap-4">
-        <button @click="checkOrder">Check Spelling</button>
-        <button @click="resetGame">Start Over</button>
+        <button @click="checkOrder">Check Spelling 🐝</button>
+        <button @click="showWord = !showWord">
+          {{ showWord ? 'Hide Word 🙈' : 'Show Word 🐵' }}
+        </button>
+        <button @click="resetGame">Start Over ♻️</button>
       </div>
     </div>
 
     <div v-if="gameCompleted" class="message">
       🎉 Congratulations <span v-if="name">{{ name }}</span
-      >! You've spelled all the words correctly!
-      <a href="" @click="resetGame">Play Again?</a>
+      >! You've spelled all the words correctly! <a href="" @click="resetGame">Play Again?</a> 🐝
     </div>
 
     <div v-if="gameMessage" class="message">{{ gameMessage }}</div>
