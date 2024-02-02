@@ -29,6 +29,9 @@ export const useSpellingStore = defineStore('spelling', {
     addWords(newWords: string[]) {
       this.words.push(...newWords)
     },
+    addName(newName: string) {
+      this.name = newName
+    },
     nextWord() {
       if (this.currentIndex < this.words.length - 1) {
         this.currentIndex++
@@ -40,16 +43,6 @@ export const useSpellingStore = defineStore('spelling', {
         this.addPoints(50)
       }
     },
-    resetGame() {
-      this.words = []
-      this.currentIndex = 0
-      this.gameCompleted = false // Reset completion state
-      this.message = '' // Clear message
-      this.points = 0 // Reset points
-    },
-    setName(newName: string) {
-      this.name = newName
-    },
     setMessage(newMessage) {
       this.message = newMessage
       setTimeout(() => this.clearMessage(), 2000)
@@ -59,6 +52,13 @@ export const useSpellingStore = defineStore('spelling', {
     },
     addPoints(points: number) {
       this.points += points
+    },
+    resetGame() {
+      this.words = []
+      this.currentIndex = 0
+      this.gameCompleted = false // Reset completion state
+      this.message = '' // Clear message
+      this.points = 0 // Reset points
     }
   }
 })
