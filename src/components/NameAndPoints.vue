@@ -21,3 +21,10 @@ watch(
     <span v-if="store.userName">{{ store.userName }}'s</span> Points: {{ displayValue }}
   </div>
 </template>
+
+<style scoped>
+.points-display {
+  font-family: 'Lucida Console', Monaco, monospace;
+  font-size: 2rem;
+}
+</style>
