@@ -15,7 +15,7 @@ export const useSpellingStore = defineStore('spellingScramble', {
     gameCompleted: false,
     gameStarted: false,
     message: '',
-    showWord: false,
+    showWord: true,
     userName: '',
     userPoints: 0,
     words: [] as string[]
