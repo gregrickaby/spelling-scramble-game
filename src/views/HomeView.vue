@@ -12,7 +12,7 @@ const store = useSpellingStore()
 <template>
   <main class="main">
     <FormSetupGame />
-    <section class="game" v-if="store.gameStarted && !store.gameCompleted">
+    <section class="game" v-if="store.gameStarted">
       <NameAndPoints />
       <CurrentWord />
       <DraggableLetters />
