@@ -1,39 +1,28 @@
 <script setup lang="ts">
-import { useCounter } from '@/composables/useCounter'
+import FormSetupGame from '@/components/FormSetupGame.vue'
+import NameAndPoints from '@/components/NameAndPoints.vue'
 import { useSpellingStore } from '@/stores/spellingStore'
 import triggerConfetti from '@/utils/confetti'
 import playSound from '@/utils/sounds'
-import { computed, ref, watch, watchEffect } from 'vue'
+import { computed, ref, watchEffect } from 'vue'
 
 const store = useSpellingStore()
-const name = ref('')
-const newWords = ref('')
-const start = ref(false)
+
 const draggableLetters = ref([])
 const dragging = ref(null)
 const showWord = ref(true)
+
 const currentWord = computed(() => store.currentWord)
 const scrambledLettersComputed = computed(() => store.scrambledWord.split(''))
-const gameMessage = computed(() => store.message)
-const gameCompleted = computed(() => store.gameCompleted)
-const { displayValue, animateTo } = useCounter()
 
 // Whenever scrambledLettersComputed changes, update draggableLetters
 watchEffect(() => {
   draggableLetters.value = scrambledLettersComputed.value.slice()
-  if (gameCompleted.value === true) {
+  if (store.gameCompleted === true) {
     triggerConfetti()
     playSound('taDa')
   }
 })
-
-watch(
-  () => store.points,
-  (newPoints) => {
-    animateTo(newPoints)
-  },
-  { immediate: true }
-)
 
 // The user is dragging a letter.
 function dragStart(e, index) {
@@ -71,13 +60,6 @@ function drop(e, index) {
   }
 }
 
-function addWordsAndStart() {
-  const wordsArray = newWords.value.split(',').map((word) => word.trim())
-  store.addWords(wordsArray)
-  start.value = true
-  playSound('start')
-}
-
 function checkOrder() {
   if (draggableLetters.value.join('') === store.currentWord) {
     store.nextWord() // Move to the next word if correct
@@ -87,50 +69,18 @@ function checkOrder() {
     playSound('negative')
   }
 }
-
-function resetGame() {
-  store.resetGame() // Reset the store state
-  newWords.value = '' // Clear the input field
-  start.value = false // Hide the game interface
-  draggableLetters.value = [] // Clear the draggable letters
-}
 </script>
 
 <template>
   <main class="space-y-8 text-center">
-    <div v-if="start" class="points-display">
-      <span v-if="name">{{ name }}'s</span> Points: {{ displayValue }}
-    </div>
-
-    <form
-      v-if="!start"
-      @submit.prevent="addWordsAndStart"
-      class="flex flex-col items-center justify-center gap-4"
-    >
-      <label class="sr-only" for="words">Enter words separated by commas</label>
-      <label class="sr-only" for="name">Enter your name (optional)</label>
-      <input
-        v-model="name"
-        id="name"
-        type="text"
-        class="w-full p-4"
-        placeholder="Enter your name (optional)"
-      />
-      <textarea
-        id="words"
-        class="w-full p-4"
-        placeholder="Enter words separated by commas (required)"
-        required
-        v-model="newWords"
-      ></textarea>
-      <p v-if="!start">To get started, add some words above and click "Start".</p>
-      <button type="submit">Start 🐝</button>
-    </form>
+    <FormSetupGame />
 
     <div
-      v-if="start && !gameCompleted"
+      v-if="store.gameStarted && !store.gameCompleted"
       class="item-center flex flex-col items-center justify-center space-y-8"
     >
+      <NameAndPoints />
+
       <h1 v-show="showWord" class="leading-0 m-0 text-8xl">
         {{ currentWord }}
       </h1>
@@ -154,22 +104,23 @@ function resetGame() {
           {{ letter }}
         </div>
       </div>
-      <p v-if="start && !gameCompleted">Drag the letters in the correct order</p>
+      <p v-if="store.gameStarted && !store.gameCompleted">Drag the letters in the correct order</p>
       <div class="drag-enter flex flex-wrap items-center justify-center gap-4">
         <button @click="checkOrder">Check Spelling 🐝</button>
         <button @click="showWord = !showWord">
           {{ showWord ? 'Hide Word 🙈' : 'Show Word 🐵' }}
         </button>
-        <button @click="resetGame">Start Over ♻️</button>
+        <button @click="store.resetGame">Start Over ♻️</button>
       </div>
     </div>
 
-    <div v-if="gameCompleted" class="message">
-      🎉 Congratulations <span v-if="name">{{ name }}</span
-      >! You've spelled all the words correctly! <a href="" @click="resetGame">Play Again?</a> 🐝
+    <div v-if="store.gameCompleted" class="message">
+      🎉 Congratulations <span v-if="store.userName">{{ store.userName }}</span
+      >! You've spelled all the words correctly!
+      <a href="" @click="store.resetGame">Play Again?</a> 🐝
     </div>
 
-    <div v-if="gameMessage" class="message">{{ gameMessage }}</div>
+    <div v-if="store.message" class="message">{{ store.message }}</div>
   </main>
 </template>
 
