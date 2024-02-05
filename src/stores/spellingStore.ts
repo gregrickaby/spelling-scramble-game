@@ -11,7 +11,6 @@ import { defineStore } from 'pinia'
 export const useSpellingStore = defineStore('spellingScramble', {
   state: () => ({
     currentIndex: 0,
-    enablePersistance: true,
     gameCompleted: false,
     gameStarted: false,
     message: '',
