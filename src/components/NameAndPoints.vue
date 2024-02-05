@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useCounter } from '@/composables/useCounter'
+import useCounter from '@/composables/useCounter'
 import { useSpellingStore } from '@/stores/spellingStore'
 import { watch } from 'vue'
 
@@ -18,13 +18,21 @@ watch(
 
 <template>
   <div v-if="store.gameStarted" class="points-display">
-    <span v-if="store.userName">{{ store.userName }}'s</span> Points: {{ displayValue }}
+    <span v-if="store.userName" class="name">{{ store.userName }}:</span>
+    <span class="points">{{ displayValue }} points</span>
   </div>
 </template>
 
 <style scoped>
 .points-display {
-  font-family: 'Lucida Console', Monaco, monospace;
-  font-size: 2rem;
+  @apply absolute right-2 top-0;
+}
+
+.name {
+  @apply mr-4 font-bold;
+}
+
+.points {
+  @apply font-mono;
 }
 </style>

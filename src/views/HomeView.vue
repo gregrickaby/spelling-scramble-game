@@ -10,14 +10,14 @@ const store = useSpellingStore()
 </script>
 
 <template>
+  <NameAndPoints />
+  <DisplayMessage />
   <main class="main">
     <FormSetupGame />
     <section class="game" v-if="store.gameStarted">
-      <NameAndPoints />
       <CurrentWord />
       <DraggableLetters />
     </section>
-    <DisplayMessage />
   </main>
 </template>
 

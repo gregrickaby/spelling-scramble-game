@@ -7,7 +7,7 @@ const store = useSpellingStore()
 const userNameInput = ref(store.userName)
 const wordsInput = ref(store.words.join(' '))
 
-function submitHandler() {
+const submitHandler = () => {
   const processedWords = wordsInput.value
     .split(/\s+/)
     .map((word) => word.trim())
@@ -42,7 +42,7 @@ function submitHandler() {
 
 <style scoped>
 .form {
-  @apply flex flex-col items-center justify-center gap-4;
+  @apply mx-auto flex max-w-4xl flex-col items-center justify-center gap-4;
 }
 .input {
   @apply w-full p-4;

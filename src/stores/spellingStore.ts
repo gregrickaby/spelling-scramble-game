@@ -15,6 +15,7 @@ export const useSpellingStore = defineStore('spellingScramble', {
     gameCompleted: false,
     gameStarted: false,
     message: '',
+    showWord: false,
     userName: '',
     userPoints: 0,
     words: [] as string[]
@@ -31,13 +32,22 @@ export const useSpellingStore = defineStore('spellingScramble', {
       this.gameStarted = true
       playSound('start')
     },
+    checkOrder(scrambledLetters: string[]) {
+      const isCorrectOrder = scrambledLetters.join('') === this.currentWord
+      if (isCorrectOrder) {
+        this.nextWord()
+      } else {
+        this.setMessage('😭 Try again!')
+        this.playSound('negative')
+      }
+    },
     nextWord() {
       if (this.currentIndex < this.words.length - 1) {
         this.currentIndex++
         this.gameCompleted = false
         this.setMessage('🥳 Correct!')
         this.addPoints(this.currentWord.length)
-        playSound('yay')
+        this.playSound('yay')
       } else {
         this.endGame()
       }
@@ -45,13 +55,13 @@ export const useSpellingStore = defineStore('spellingScramble', {
     endGame() {
       this.addPoints(50)
       triggerConfetti()
-      playSound('tada')
+      this.playSound('tada')
       this.message = '🎉 Congratulations! You completed the game!'
       this.gameCompleted = true
     },
     setMessage(newMessage: string) {
       this.message = newMessage
-      setTimeout(() => this.clearMessage(), 2000)
+      setTimeout(() => this.clearMessage(), 3000)
     },
     clearMessage() {
       this.message = ''
@@ -65,6 +75,9 @@ export const useSpellingStore = defineStore('spellingScramble', {
       this.gameStarted = false
       this.message = ''
       this.userPoints = 0
+    },
+    playSound(sound: string) {
+      playSound(sound)
     }
   },
   persist: true

@@ -1,6 +1,5 @@
 <script lang="ts">
 import { useSpellingStore } from '@/stores/spellingStore'
-import playSound from '@/utils/sounds'
 import { defineComponent, onMounted, ref, watch } from 'vue'
 import { VueDraggableNext } from 'vue-draggable-next'
 
@@ -15,7 +14,7 @@ export default defineComponent({
   },
   setup() {
     const store = useSpellingStore()
-    const scrambledLetters = ref([] as string[])
+    const scrambledLetters = ref<string[]>([])
 
     // Scramble the letters of the current word.
     const scramble = (word: string) => word.split('').sort(() => Math.random() - 0.5)
@@ -33,30 +32,22 @@ export default defineComponent({
       }
     )
 
-    const click = () => {
-      playSound('click')
-    }
-
+    // Check the order of the letters against the current word.
     const checkOrder = () => {
-      if (scrambledLetters.value.join('') === store.currentWord) {
-        store.nextWord()
-      } else {
-        store.setMessage('😭 Try again!')
-        playSound('negative')
-      }
+      store.checkOrder(scrambledLetters.value)
     }
 
-    const resetGame = () => {
-      store.resetGame()
-    }
-
-    return { store, click, scrambledLetters, checkOrder, resetGame }
+    return { store, scrambledLetters, checkOrder }
   }
 })
 </script>
 
 <template>
-  <VueDraggableNext v-model="scrambledLetters" class="draggable-container" @end="click">
+  <VueDraggableNext
+    v-model="scrambledLetters"
+    class="draggable-container"
+    @end="store.playSound('click')"
+  >
     <div v-for="(letter, index) in scrambledLetters" :key="index">
       <div class="letter draggable">
         {{ letter }}
@@ -65,7 +56,12 @@ export default defineComponent({
   </VueDraggableNext>
   <div class="buttons-container">
     <button v-if="!store.gameCompleted" @click="checkOrder">Check Spelling 🐝</button>
-    <button @click="resetGame">Start Over ♻️</button>
+    <button v-if="!store.gameCompleted" @click="store.showWord = !store.showWord">
+      {{ store.showWord ? 'Hide Word 🙈' : 'Show Word 🐵' }}
+    </button>
+    <button @click="store.resetGame">
+      {{ store.gameCompleted ? 'Play Again? 🐝' : 'Start Over ♻️' }}
+    </button>
   </div>
 </template>
 
