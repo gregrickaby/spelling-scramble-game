@@ -1,90 +1,71 @@
-<script setup lang="ts">
+<script lang="ts">
 import { useSpellingStore } from '@/stores/spellingStore'
 import playSound from '@/utils/sounds'
-import { computed, ref, watchEffect } from 'vue'
+import { defineComponent, onMounted, ref, watch } from 'vue'
+import { VueDraggableNext } from 'vue-draggable-next'
 
-const store = useSpellingStore()
+/**
+ * VueDraggableNext requires defineComponent instead of setup.
+ *
+ * @see https://github.com/anish2690/vue-draggable-next
+ */
+export default defineComponent({
+  components: {
+    VueDraggableNext
+  },
+  setup() {
+    const store = useSpellingStore()
+    const scrambledLetters = ref([] as string[])
 
-const draggableLetters = ref([])
-const letters = ref([])
-const dragging = ref(null)
-const scrambledLettersComputed = computed(() => store.scrambledWord.split(''))
+    // Scramble the letters of the current word.
+    const scramble = (word: string) => word.split('').sort(() => Math.random() - 0.5)
 
-watchEffect(() => {
-  letters.value = scrambledLettersComputed.value.slice()
+    // When the component is mounted, scramble the letters of the current word.
+    onMounted(() => {
+      scrambledLetters.value = scramble(store.currentWord)
+    })
+
+    // When the current word changes, scramble the letters of the new word.
+    watch(
+      () => store.currentWord,
+      (newWord) => {
+        scrambledLetters.value = scramble(newWord)
+      }
+    )
+
+    const click = () => {
+      playSound('click')
+    }
+
+    const checkOrder = () => {
+      if (scrambledLetters.value.join('') === store.currentWord) {
+        store.nextWord()
+      } else {
+        store.setMessage('😭 Try again!')
+        playSound('negative')
+      }
+    }
+
+    const resetGame = () => {
+      store.resetGame()
+    }
+
+    return { store, click, scrambledLetters, checkOrder, resetGame }
+  }
 })
-
-// The user has started dragging a letter.
-function dragStart(e, index) {
-  e.dataTransfer.setData('text/plain', index.toString())
-  dragging.value = index
-  e.target.classList.add('dragging')
-}
-
-// The user is dragging a letter over another letter.
-function dragEnter(e, index) {
-  if (index !== dragging.value) {
-    e.target.classList.add('wiggle')
-  }
-}
-
-function dragOver(e, index) {
-  e.preventDefault()
-}
-
-// The user is dragging a letter out of another letter.
-function dragLeave(e, index) {
-  e.target.classList.remove('wiggle')
-  e.target.classList.remove('dragging')
-}
-
-// The user has dropped a letter.
-function drop(e, index) {
-  if (dragging.value !== null) {
-    const draggedItem = draggableLetters.value.splice(dragging.value, 1)[0]
-    draggableLetters.value.splice(index, 0, draggedItem)
-    dragging.value = null
-    e.target.classList.remove('dragging')
-    e.target.classList.remove('wiggle')
-    playSound('click')
-  }
-}
-
-function checkOrder() {
-  if (letters.value.join('') === store.currentWord) {
-    store.nextWord()
-    playSound('yay')
-  } else {
-    store.setMessage('😭 Try again!')
-    playSound('negative')
-  }
-}
 </script>
 
 <template>
-  <div class="draggable-container">
-    <div
-      v-for="(letter, index) in letters"
-      :key="index"
-      @dragenter="dragEnter($event, index)"
-      @dragleave="dragLeave($event, index)"
-      @dragover.prevent
-      @dragover="dragOver($event, index)"
-      @dragstart="dragStart($event, index)"
-      @drop="drop($event, index)"
-      @touchend="drop($event, index)"
-      @touchmove="dragOver($event, index)"
-      @touchstart="dragStart($event, index)"
-      class="letter draggable"
-      draggable="true"
-    >
-      {{ letter }}
+  <VueDraggableNext v-model="scrambledLetters" class="draggable-container" @end="click">
+    <div v-for="(letter, index) in scrambledLetters" :key="index">
+      <div class="letter draggable">
+        {{ letter }}
+      </div>
     </div>
-  </div>
-  <p v-if="store.gameStarted && !store.gameCompleted">Drag the letters in the correct order</p>
+  </VueDraggableNext>
   <div class="buttons-container">
-    <button @click="checkOrder">Check Spelling 🐝</button>
-    <button @click="store.resetGame">Start Over ♻️</button>
+    <button v-if="!store.gameCompleted" @click="checkOrder">Check Spelling 🐝</button>
+    <button @click="resetGame">Start Over ♻️</button>
   </div>
 </template>
 
@@ -97,16 +78,9 @@ function checkOrder() {
   @apply rounded border-2 px-5 py-3 text-6xl leading-none shadow-lg;
 }
 
-.draggable {
-  cursor: move;
-  user-select: none;
-}
+.sortable-ghost {
+  @apply bg-slate-100;
 
-.dragging {
-  opacity: 0.5;
-}
-
-.wiggle {
   animation: wiggleAndScale 0.5s ease-in-out infinite;
 
   @media (prefers-reduced-motion: reduce) {
@@ -121,10 +95,10 @@ function checkOrder() {
 @keyframes wiggleAndScale {
   0%,
   100% {
-    transform: scale(1.2) rotate(-3deg);
+    transform: scale(1.1) rotate(-3deg);
   }
   50% {
-    transform: scale(1.2) rotate(3deg);
+    transform: scale(1.1) rotate(3deg);
   }
 }
 </style>

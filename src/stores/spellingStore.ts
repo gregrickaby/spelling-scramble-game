@@ -1,3 +1,4 @@
+import triggerConfetti from '@/utils/confetti'
 import playSound from '@/utils/sounds'
 import { defineStore } from 'pinia'
 
@@ -21,16 +22,6 @@ export const useSpellingStore = defineStore('spellingScramble', {
   getters: {
     currentWord(state): string {
       return state.words[state.currentIndex] || ''
-    },
-    scrambledWord(): string {
-      if (this.currentWord) {
-        const shuffled = this.currentWord
-          .split('')
-          .sort(() => 0.5 - Math.random())
-          .join('')
-        return shuffled
-      }
-      return ''
     }
   },
   actions: {
@@ -46,11 +37,17 @@ export const useSpellingStore = defineStore('spellingScramble', {
         this.gameCompleted = false
         this.setMessage('🥳 Correct!')
         this.addPoints(this.currentWord.length)
-        playSound('correct')
+        playSound('yay')
       } else {
-        this.gameCompleted = true
-        this.addPoints(50)
+        this.endGame()
       }
+    },
+    endGame() {
+      this.addPoints(50)
+      triggerConfetti()
+      playSound('tada')
+      this.message = '🎉 Congratulations! You completed the game!'
+      this.gameCompleted = true
     },
     setMessage(newMessage: string) {
       this.message = newMessage
