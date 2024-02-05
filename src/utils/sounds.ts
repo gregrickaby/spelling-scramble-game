@@ -1,7 +1,7 @@
 import click from '@/assets/click.mp3'
 import negative from '@/assets/negative.mp3'
 import start from '@/assets/start.mp3'
-import taDa from '@/assets/tada.mp3'
+import tada from '@/assets/tada.mp3'
 import yay from '@/assets/yay.mp3'
 
 // A map of sound names to their paths.
@@ -9,7 +9,7 @@ const sounds: Record<string, string> = {
   click,
   negative,
   start,
-  taDa,
+  tada,
   yay
 }
 
