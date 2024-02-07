@@ -55,7 +55,7 @@ export const useSpellingStore = defineStore('spellingScramble', {
       this.addPoints(50)
       triggerConfetti()
       this.playSound('tada')
-      this.message = '🎉 Congratulations! You completed the game!'
+      this.message = `🎉 Congratulations, ${this.userName}! You completed the game and earned ${this.userPoints} points!`
       this.gameCompleted = true
     },
     setMessage(newMessage: string) {
