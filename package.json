@@ -18,23 +18,23 @@
     "canvas-confetti": "^1.9.3",
     "pinia": "^2.2.0",
     "pinia-plugin-persistedstate": "^3.2.1",
-    "vue": "^3.4.34",
+    "vue": "^3.4.35",
     "vue-draggable-next": "^2.2.1",
-    "vue-router": "^4.4.0"
+    "vue-router": "^4.4.2"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.10.4",
     "@tailwindcss/typography": "github:tailwindcss/typography",
     "@tsconfig/node20": "^20.1.4",
     "@types/jsdom": "^21.1.7",
-    "@types/node": "^22.0.0",
-    "@vitejs/plugin-vue": "^5.1.1",
+    "@types/node": "^22.1.0",
+    "@vitejs/plugin-vue": "^5.1.2",
     "@vue/eslint-config-prettier": "^9.0.0",
     "@vue/eslint-config-typescript": "^13.0.0",
     "@vue/test-utils": "^2.4.6",
     "@vue/tsconfig": "^0.5.1",
-    "autoprefixer": "^10.4.19",
-    "cypress": "^13.13.1",
+    "autoprefixer": "^10.4.20",
+    "cypress": "^13.13.2",
     "eslint": "^9.0.0",
     "eslint-plugin-cypress": "^3.4.0",
     "eslint-plugin-vue": "^9.27.0",
@@ -47,7 +47,7 @@
     "tailwindcss": "^3.4.7",
     "typescript": "~5.5.4",
     "vite": "^5.3.5",
-    "vitest": "^2.0.4",
+    "vitest": "^2.0.5",
     "vue-tsc": "^2.0.29"
   }
 }
